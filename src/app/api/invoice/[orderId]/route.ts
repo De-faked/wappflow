@@ -3,6 +3,10 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { buildInvoicePdf } from "@/lib/invoice";
 
+export const dynamic = "force-dynamic";
+
+export const runtime = "nodejs";
+
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ orderId: string }> }

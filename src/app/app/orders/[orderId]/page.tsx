@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { waLink } from "@/lib/whatsapp";
+import { headers } from "next/headers";
 
 export default async function OrderInvoicePage({ params }: { params: Promise<{ orderId: string }> }) {
   const user = await getCurrentUser();
