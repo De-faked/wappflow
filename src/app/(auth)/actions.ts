@@ -5,7 +5,7 @@ import { SignupSchema, LoginSchema } from "@/lib/validation";
 import { createSession, hashPassword, verifyPassword, logout as doLogout } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
-export async function signupAction(formData: FormData) {
+export async function signupAction(_prevState: any, formData: FormData) {
   const parsed = SignupSchema.safeParse({
     businessName: formData.get("businessName"),
     email: formData.get("email"),
@@ -46,7 +46,7 @@ export async function signupAction(formData: FormData) {
   redirect("/app");
 }
 
-export async function loginAction(formData: FormData) {
+export async function loginAction(_prevState: any, formData: FormData) {
   const parsed = LoginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),

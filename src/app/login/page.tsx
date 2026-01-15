@@ -1,23 +1,40 @@
+"use client";
+
+import Link from "next/link";
+import { useActionState } from "react";
 import { loginAction } from "@/app/(auth)/actions";
 
+type AuthState = { ok: boolean; error?: string };
+
+const initialState: AuthState = { ok: true, error: "" };
+
 export default function LoginPage() {
+  const [state, formAction, pending] = useActionState(loginAction as any, initialState);
+
   return (
-    <main className="min-h-screen p-6 flex items-center justify-center">
-      <div className="w-full max-w-md rounded-2xl border p-6">
-        <h1 className="text-2xl font-semibold">Login</h1>
-        <p className="text-sm text-gray-600 mt-1">
-          Continue to your WhatsApp operations dashboard.
+    <main className="min-h-dvh flex items-center justify-center p-6">
+      <div className="w-full max-w-md rounded-xl border bg-white p-6 shadow-sm">
+        <h1 className="text-xl font-semibold">Login</h1>
+        <p className="mt-2 text-sm text-gray-600">
+          Sign in to manage customers, orders, and invoices.
         </p>
 
-        <form action={loginAction} className="mt-6 space-y-4">
+        {state?.error ? (
+          <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {state.error}
+          </div>
+        ) : null}
+
+        <form action={formAction} className="mt-6 space-y-4">
           <div>
             <label className="text-sm font-medium">Email</label>
             <input
               name="email"
               type="email"
               required
-              className="mt-2 w-full rounded-lg border px-3 py-2"
+              className="mt-1 w-full rounded-md border px-3 py-2"
               placeholder="you@example.com"
+              autoComplete="email"
             />
           </div>
 
@@ -27,21 +44,26 @@ export default function LoginPage() {
               name="password"
               type="password"
               required
-              className="mt-2 w-full rounded-lg border px-3 py-2"
-              placeholder="Your password"
+              className="mt-1 w-full rounded-md border px-3 py-2"
+              placeholder="••••••••"
+              autoComplete="current-password"
             />
           </div>
 
-          <button className="w-full rounded-lg bg-black text-white py-2">
-            Login
+          <button
+            type="submit"
+            disabled={pending}
+            className="w-full rounded-md bg-black px-4 py-2 text-white disabled:opacity-60"
+          >
+            {pending ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
-        <p className="text-sm text-gray-600 mt-4">
-          New here?{" "}
-          <a className="underline" href="/signup">
-            Create an account
-          </a>
+        <p className="mt-4 text-sm text-gray-600">
+          No account?{" "}
+          <Link className="underline" href="/signup">
+            Create one
+          </Link>
         </p>
       </div>
     </main>
