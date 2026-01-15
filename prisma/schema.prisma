@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Business {
+  id        String   @id @default(cuid())
+  name      String
+  currency  String   @default("SAR")
+  locale    String   @default("ar")
+  createdAt DateTime @default(now())
+
+  users     User[]
+  customers Customer[]
+  orders    Order[]
+  sequences Sequence[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  businessId   String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("owner") // owner | staff
+  createdAt    DateTime @default(now())
+
+  business     Business @relation(fields: [businessId], references: [id])
+  sessions     Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Customer {
+  id         String   @id @default(cuid())
+  businessId String
+  name       String
+  phoneE164  String   // +9665...
+  notes      String   @default("")
+  createdAt  DateTime @default(now())
+
+  business   Business @relation(fields: [businessId], references: [id])
+  orders     Order[]
+}
+
+model Order {
+  id            String   @id @default(cuid())
+  businessId    String
+  customerId    String
+  orderNo       Int
+  status        String   @default("new") // new|confirmed|delivered|paid|lost
+  total         Float    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastContactAt DateTime?
+
+  business      Business  @relation(fields: [businessId], references: [id])
+  customer      Customer  @relation(fields: [customerId], references: [id])
+  items         OrderItem[]
+
+  @@unique([businessId, orderNo])
+  @@index([businessId, status])
+  @@index([customerId])
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  name      String
+  qty       Int    @default(1)
+  unitPrice Float  @default(0)
+
+  order     Order  @relation(fields: [orderId], references: [id])
+}
+
+model Sequence {
+  id         String   @id @default(cuid())
+  businessId String
+  key        String   // "orderNo"
+  nextVal    Int      @default(1)
+
+  business   Business @relation(fields: [businessId], references: [id])
+
+  @@unique([businessId, key])
+}
