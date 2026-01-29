@@ -4,8 +4,12 @@ import { prisma } from "@/lib/db";
 import { SignupSchema, LoginSchema } from "@/lib/validation";
 import { createSession, hashPassword, verifyPassword, logout as doLogout } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { checkRateLimit } from "@/lib/ratelimit";
 
 export async function signupAction(_prevState: any, formData: FormData) {
+  const allowed = await checkRateLimit("signup", 3, 60 * 60); // 3 per hour
+  if (!allowed) return { ok: false, error: "Too many attempts. Try again later." };
+
   const parsed = SignupSchema.safeParse({
     businessName: formData.get("businessName"),
     email: formData.get("email"),
@@ -47,6 +51,9 @@ export async function signupAction(_prevState: any, formData: FormData) {
 }
 
 export async function loginAction(_prevState: any, formData: FormData) {
+  const allowed = await checkRateLimit("login", 5, 60); // 5 per minute
+  if (!allowed) return { ok: false, error: "Too many attempts. Try again later." };
+
   const parsed = LoginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),

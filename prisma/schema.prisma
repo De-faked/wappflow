@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
 
 model Business {
@@ -92,4 +92,16 @@ model Sequence {
   business   Business @relation(fields: [businessId], references: [id])
 
   @@unique([businessId, key])
+}
+
+model RateLimit {
+  id        String   @id @default(cuid())
+  ip        String
+  action    String
+  count     Int      @default(1)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@unique([ip, action])
+  @@index([expiresAt])
 }

@@ -4,21 +4,29 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { nextOrderNo } from "@/lib/sequence";
+import { CreateCustomerSchema, CreateOrderSchema } from "@/lib/validation";
 
 function requireUser() {
   return getCurrentUser();
 }
 
-export async function createCustomerAction(formData: FormData) {
+
+
+export async function createCustomerAction(_prevState: any, formData: FormData) {
   const user = await requireUser();
   if (!user) redirect("/login");
 
-  const name = String(formData.get("name") || "").trim();
-  const phoneE164 = String(formData.get("phoneE164") || "").trim();
-  const notes = String(formData.get("notes") || "").trim();
+  const parsed = CreateCustomerSchema.safeParse({
+    name: formData.get("name"),
+    phoneE164: formData.get("phoneE164"),
+    notes: formData.get("notes"),
+  });
 
-  if (!name || name.length < 2) return;
-  if (!phoneE164.startsWith("+") || phoneE164.length < 8) return;
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0].message };
+  }
+
+  const { name, phoneE164, notes } = parsed.data;
 
   await prisma.customer.create({
     data: {
@@ -32,22 +40,26 @@ export async function createCustomerAction(formData: FormData) {
   redirect("/app/customers");
 }
 
-export async function createOrderAction(formData: FormData) {
+export async function createOrderAction(_prevState: any, formData: FormData) {
   const user = await requireUser();
   if (!user) redirect("/login");
 
-  const customerId = String(formData.get("customerId") || "").trim();
-  const status = String(formData.get("status") || "new").trim();
-  const itemName = String(formData.get("itemName") || "").trim();
-  const qty = Number(formData.get("qty") || 1);
-  const unitPrice = Number(formData.get("unitPrice") || 0);
+  const parsed = CreateOrderSchema.safeParse({
+    customerId: formData.get("customerId"),
+    status: formData.get("status"),
+    itemName: formData.get("itemName"),
+    qty: formData.get("qty"),
+    unitPrice: formData.get("unitPrice"),
+  });
 
-  if (!customerId) return;
-  if (!itemName) return;
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0].message };
+  }
+
+  const { customerId, status, itemName, qty, unitPrice } = parsed.data;
 
   const orderNo = await nextOrderNo(user.businessId);
-
-  const total = Math.max(0, qty) * Math.max(0, unitPrice);
+  const total = qty * unitPrice;
 
   await prisma.order.create({
     data: {
@@ -58,7 +70,7 @@ export async function createOrderAction(formData: FormData) {
       total,
       lastContactAt: null,
       items: {
-        create: [{ name: itemName, qty: Math.max(1, qty), unitPrice: Math.max(0, unitPrice) }],
+        create: [{ name: itemName, qty, unitPrice }],
       },
     },
   });

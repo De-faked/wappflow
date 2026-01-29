@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { createCustomerAction } from "@/app/app/actions";
+import { NewCustomerForm } from "./new-customer-form";
 
 export default async function CustomersPage() {
   const user = await getCurrentUser();
@@ -16,20 +17,7 @@ export default async function CustomersPage() {
     <div className="space-y-6">
       <h1 className="text-xl font-semibold">Customers</h1>
 
-      <div className="rounded-2xl border p-5">
-        <h2 className="font-semibold">Add customer</h2>
-
-        <form action={createCustomerAction} className="mt-4 grid gap-3">
-          <input name="name" className="rounded-lg border px-3 py-2" placeholder="Name" required />
-          <input name="phoneE164" className="rounded-lg border px-3 py-2" placeholder="+9665..." required />
-          <input name="notes" className="rounded-lg border px-3 py-2" placeholder="Notes (optional)" />
-          <button className="rounded-lg bg-black text-white py-2">Create</button>
-        </form>
-
-        <p className="text-xs text-gray-600 mt-3">
-          Phone must be E.164 format, e.g. +9665xxxxxxx.
-        </p>
-      </div>
+      <NewCustomerForm />
 
       <div className="rounded-2xl border">
         <div className="p-4 border-b font-semibold">Customer list</div>
