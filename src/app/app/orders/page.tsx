@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { createOrderAction, touchLastContactAction } from "@/app/app/actions";
 import { waLink, msgNewOrder, msgFollowUp, msgPaymentReminder } from "@/lib/whatsapp";
+import { NewOrderForm } from "./new-order-form";
 
 export default async function OrdersPage() {
   const user = await getCurrentUser();
@@ -25,53 +26,7 @@ export default async function OrdersPage() {
     <div className="space-y-6">
       <h1 className="text-xl font-semibold">Orders</h1>
 
-      <div className="rounded-2xl border p-5">
-        <h2 className="font-semibold">Create order</h2>
-
-        {customers.length === 0 ? (
-          <p className="text-sm text-gray-600 mt-3">
-            Create a customer first.
-          </p>
-        ) : (
-          <form action={createOrderAction} className="mt-4 grid gap-3">
-            <label className="text-sm font-medium">Customer</label>
-            <select name="customerId" className="rounded-lg border px-3 py-2" required>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} ({c.phoneE164})
-                </option>
-              ))}
-            </select>
-
-            <label className="text-sm font-medium">Status</label>
-            <select name="status" className="rounded-lg border px-3 py-2">
-              <option value="new">new</option>
-              <option value="confirmed">confirmed</option>
-              <option value="delivered">delivered</option>
-              <option value="paid">paid</option>
-              <option value="lost">lost</option>
-            </select>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="sm:col-span-2">
-                <label className="text-sm font-medium">Item</label>
-                <input name="itemName" className="mt-2 rounded-lg border px-3 py-2 w-full" placeholder="e.g., Oud 50g" required />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Qty</label>
-                <input name="qty" type="number" min="1" defaultValue={1} className="mt-2 rounded-lg border px-3 py-2 w-full" />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">Unit price</label>
-              <input name="unitPrice" type="number" min="0" step="0.01" defaultValue={0} className="mt-2 rounded-lg border px-3 py-2 w-full" />
-            </div>
-
-            <button className="rounded-lg bg-black text-white py-2">Create</button>
-          </form>
-        )}
-      </div>
+      <NewOrderForm customers={customers} />
 
       <div className="rounded-2xl border">
         <div className="p-4 border-b font-semibold">Recent orders</div>

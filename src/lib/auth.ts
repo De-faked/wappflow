@@ -38,7 +38,7 @@ export async function createSession(userId: string, days = 14) {
   (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: false, // set true when deployed with HTTPS
+    secure: process.env.NODE_ENV === "production", // set true when deployed with HTTPS
     path: "/",
     expires: expiresAt,
   });
